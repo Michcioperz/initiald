@@ -9,6 +9,7 @@ import (
 )
 
 func handleSigchld(c <-chan os.Signal) {
+	log.Println("process reaper launching")
 	for {
 		_ = <-c
 		for {
@@ -23,19 +24,22 @@ func handleSigchld(c <-chan os.Signal) {
 }
 
 func main() {
-	log.SetOutput(os.Stderr)
-	log.Print("initiald starting up")
+	initLogging()
+	defer closeLogging()
+	log.Println("initiald starting up")
+	log.Println("preparing process reaper")
   chldchan := make(chan os.Signal, 10)
 	go handleSigchld(chldchan)
   signal.Notify(chldchan, syscall.SIGCHLD)
+	log.Println("opening console")
 	for {
-		tty := exec.Command("/bin/agetty", "tty1")
+		tty := exec.Command("/bin/agetty", "--noclear", "tty1")
 		err := tty.Start()
 		if err != nil {
-			log.Print("agetty could not be started", tty)
+			log.Println("agetty could not be started: ", err)
 			break
 		}
 		err = tty.Wait()
-		log.Print("agetty terminated with", err)
+		log.Println("agetty terminated with ", err)
 	}
 }
