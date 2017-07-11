@@ -18,19 +18,12 @@ func handleSigchld(c <-chan os.Signal) {
 			if pid == 0 || err == syscall.ECHILD {
 				break
 			}
-			log.Print("reaped", pid, err)
+			log.Println("reaped", pid, err)
 		}
 	}
 }
 
-func main() {
-	initLogging()
-	defer closeLogging()
-	log.Println("initiald starting up")
-	log.Println("preparing process reaper")
-	chldchan := make(chan os.Signal, 10)
-	go handleSigchld(chldchan)
-	signal.Notify(chldchan, syscall.SIGCHLD)
+func handleTty() {
 	log.Println("opening console")
 	for {
 		tty := exec.Command("/bin/agetty", "--noclear", "tty1")
@@ -42,4 +35,20 @@ func main() {
 		err = tty.Wait()
 		log.Println("agetty terminated with ", err)
 	}
+}
+
+func initReaper() {
+	log.Println("preparing process reaper")
+	chldchan := make(chan os.Signal, 10)
+	go handleSigchld(chldchan)
+	signal.Notify(chldchan, syscall.SIGCHLD)
+}
+
+func main() {
+	initLogging()
+	defer closeLogging()
+	log.Println("initiald starting up")
+	initReaper()
+	initTrueno()
+	handleTty()
 }
