@@ -28,9 +28,9 @@ func main() {
 	defer closeLogging()
 	log.Println("initiald starting up")
 	log.Println("preparing process reaper")
-  chldchan := make(chan os.Signal, 10)
+	chldchan := make(chan os.Signal, 10)
 	go handleSigchld(chldchan)
-  signal.Notify(chldchan, syscall.SIGCHLD)
+	signal.Notify(chldchan, syscall.SIGCHLD)
 	log.Println("opening console")
 	for {
 		tty := exec.Command("/bin/agetty", "--noclear", "tty1")
