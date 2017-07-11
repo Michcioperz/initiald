@@ -45,10 +45,14 @@ func initReaper() {
 }
 
 func main() {
-	initLogging()
-	defer closeLogging()
-	log.Println("initiald starting up")
-	initReaper()
-	initTrueno()
-	handleTty()
+	if amIInit() {
+		initLogging()
+		defer closeLogging()
+		log.Println("initiald starting up")
+		initReaper()
+		initTrueno()
+		handleTty()
+	} else {
+		log.Println("I am here to communicate")
+	}
 }
