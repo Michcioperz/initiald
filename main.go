@@ -50,6 +50,7 @@ func main() {
 		defer closeLogging()
 		log.Println("initiald starting up")
 		initReaper()
+		initHostname()
 		initTrueno()
 		handleTty()
 	} else {
